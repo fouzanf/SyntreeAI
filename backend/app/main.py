@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.routers import ingest, query, graph, analysis, pr_review
+from app.routers import ingest, query, graph, analysis, pr_review, health
 from app.services.vector_store import init_db
 
 # Configure global application logging
@@ -48,6 +48,7 @@ app.include_router(query.router, tags=["Querying"])
 app.include_router(graph.router, tags=["Dependency Graph"])
 app.include_router(analysis.router, tags=["Code Smell Detector"])
 app.include_router(pr_review.router, tags=["PR Review Mode"])
+app.include_router(health.router, tags=["Codebase Health"])
 
 @app.get("/health")
 def health_check():

@@ -286,3 +286,45 @@ export async function annotateDiff(repoId: number, filename: string): Promise<an
   return response.json();
 }
 
+/**
+ * Triggers computing of health metrics for a repository.
+ */
+export async function runHealthCheck(repoId: number): Promise<any> {
+  const response = await fetch(`${BACKEND_URL}/health/${repoId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    let errorDetail = "Failed to run health check";
+    try {
+      const errorJson = await response.json();
+      errorDetail = errorJson.detail || errorDetail;
+    } catch {
+      // Ignore
+    }
+    throw new Error(errorDetail);
+  }
+
+  return response.json();
+}
+
+/**
+ * Fetches the cached health report for a repository.
+ */
+export async function getHealthReport(repoId: number): Promise<any> {
+  const response = await fetch(`${BACKEND_URL}/health/${repoId}`);
+  if (!response.ok) {
+    let errorDetail = "Failed to fetch health report";
+    try {
+      const errorJson = await response.json();
+      errorDetail = errorJson.detail || errorDetail;
+    } catch {
+      // Ignore
+    }
+    throw new Error(errorDetail);
+  }
+  return response.json();
+}

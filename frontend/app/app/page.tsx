@@ -30,8 +30,10 @@ import dynamic from "next/dynamic";
 import DependencyGraph from "../components/DependencyGraph";
 import CodeSmellDetector from "../components/CodeSmellDetector";
 import SemanticDiffViewer from "../components/SemanticDiffViewer";
+import HealthSummary from "../components/HealthSummary";
+import HealthDashboard from "../components/HealthDashboard";
 
-import { ingestRepo, streamQuery, reviewPR, Citation } from "../lib/api";
+import { ingestRepo, streamQuery, reviewPR, Citation, runHealthCheck, getHealthReport } from "../lib/api";
 
 const AppBackground = dynamic(() => import("../components/AppBackground"), {
   ssr: false,
@@ -213,6 +215,9 @@ export default function AppPage() {
   const [showCodeSmell, setShowCodeSmell] = useState(false);
   const [showDiff, setShowDiff] = useState(false);
   const [prUrl, setPrUrl] = useState("");
+  const [healthData, setHealthData] = useState<any>(null);
+  const [healthLoading, setHealthLoading] = useState(false);
+  const [showHealthDashboard, setShowHealthDashboard] = useState(false);
 
   // Loading indicator states (Ingesting)
   const [progressStep, setProgressStep] = useState(0);
@@ -319,6 +324,11 @@ export default function AppPage() {
             // Transition to chat state immediately
             setPageState("CHAT");
             setIngestStatus("idle");
+            try {
+              getHealthReport(repoId).then((cached) => {
+                setHealthData(cached);
+              }).catch(() => {});
+            } catch (e) {}
             
             // Add initial messages
             setMessages([
@@ -403,6 +413,12 @@ export default function AppPage() {
       });
       setPageState("CHAT");
       setIngestStatus("idle");
+      try {
+        const cachedReport = await getHealthReport(res.repo_id);
+        setHealthData(cachedReport);
+      } catch (e) {
+        // No report cached yet
+      }
     } catch (err: any) {
       console.error(err);
       setIngestStatus("error");
@@ -588,6 +604,9 @@ export default function AppPage() {
     setIngestStatus("idle");
     setIngestError("");
     setChatHistory([]);
+    setHealthData(null);
+    setHealthLoading(false);
+    setShowHealthDashboard(false);
   };
 
   const fileTree = buildTreeFromCitations(accumulatedCitations);
@@ -915,6 +934,59 @@ export default function AppPage() {
                       <span>View Diff</span>
                     </button>
                   )}
+
+                  <div style={{ marginTop: "10px", width: "100%" }}>
+                    {healthLoading ? (
+                      <button
+                        disabled
+                        className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-[#10B981]/50 bg-[#10B981]/5 text-xs font-mono font-bold text-[#10B981] opacity-70"
+                      >
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Analyzing...</span>
+                      </button>
+                    ) : (
+                      !healthData && (
+                        <button
+                          onClick={async () => {
+                            if (!repoInfo) return;
+                            try {
+                              setHealthLoading(true);
+                              const res = await runHealthCheck(repoInfo.id);
+                              setHealthData(res);
+                            } catch (err: any) {
+                              alert(`Health check failed: ${err.message || err}`);
+                            } finally {
+                              setHealthLoading(false);
+                            }
+                          }}
+                          className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-[#10B981] hover:border-[#10B981]/80 bg-transparent hover:bg-[#10B981]/10 text-xs font-mono font-bold text-[#10B981] hover:text-[#10B981]/90 transition-all cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.1)]"
+                        >
+                          <span style={{ fontSize: "14px" }}>🏥</span>
+                          <span>Run Health Check</span>
+                        </button>
+                      )
+                    )}
+                  </div>
+
+                  {healthData && (
+                    <HealthSummary
+                      healthData={healthData}
+                      onOpenDashboard={() => setShowHealthDashboard(true)}
+                      onRunAnalysis={async () => {
+                        if (!repoInfo) return;
+                        try {
+                          setHealthLoading(true);
+                          const res = await runHealthCheck(repoInfo.id);
+                          setHealthData(res);
+                        } catch (err: any) {
+                          alert(`Health check failed: ${err.message || err}`);
+                        } finally {
+                          setHealthLoading(false);
+                        }
+                      }}
+                      loading={healthLoading}
+                    />
+                  )}
                 </div>
 
                 {/* Left Panel Tabs Toggle */}
@@ -1129,6 +1201,26 @@ export default function AppPage() {
                     repoId={repoInfo.id}
                     prUrl={prUrl}
                     onClose={() => setShowDiff(false)}
+                  />
+                )}
+
+                {showHealthDashboard && healthData && (
+                  <HealthDashboard
+                    healthData={healthData}
+                    onClose={() => setShowHealthDashboard(false)}
+                    onRerun={async () => {
+                      if (!repoInfo) return;
+                      try {
+                        setHealthLoading(true);
+                        const res = await runHealthCheck(repoInfo.id);
+                        setHealthData(res);
+                      } catch (err: any) {
+                        alert(`Health check failed: ${err.message || err}`);
+                      } finally {
+                        setHealthLoading(false);
+                      }
+                    }}
+                    loading={healthLoading}
                   />
                 )}
               </div>

@@ -3,7 +3,7 @@ import logging
 from typing import List, Tuple, Any
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, text, ARRAY, select, delete
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, text, ARRAY, select, delete, JSON
 from pgvector.sqlalchemy import Vector
 from app.config import settings
 
@@ -65,6 +65,15 @@ class Chunk(Base):
     embedding = Column(Vector(768), nullable=False)
 
     repo = relationship("Repo", back_populates="chunks")
+
+class HealthReport(Base):
+    __tablename__ = "health_reports"
+
+    repo_id = Column(Integer, ForeignKey("repos.id", ondelete="CASCADE"), primary_key=True)
+    computed_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    report_json = Column(JSON, nullable=False)
+
+    repo = relationship("Repo")
 
 async def init_db():
     """Startup initialization: creates vector extension and tables."""

@@ -35,7 +35,7 @@ class RetrievalService:
         self.embedding_service = EmbeddingService()
         self.vector_store = VectorStore()
         self.client = genai.Client(api_key=settings.gemini_api_key)
-        self.model = "gemini-2.5-flash"
+        self.model = "gemini-3.5-flash"
 
     @retry(
         retry=retry_if_exception(is_rate_limit_error),
