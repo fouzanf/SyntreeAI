@@ -104,7 +104,7 @@ def stream_pr_answer(question: str, context_str: str, diff_summary: str, message
     try:
         client = genai.Client(api_key=settings.gemini_api_key)
         response = client.models.generate_content_stream(
-            model="gemini-3.5-flash",
+            model="gemini-2.5-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt,
@@ -455,7 +455,7 @@ async def annotate_diff(request: AnnotateDiffRequest):
         try:
             client = genai.Client(api_key=settings.gemini_api_key)
             response = client.models.generate_content(
-                model="gemini-3.5-flash",
+                model="gemini-2.5-flash",
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",

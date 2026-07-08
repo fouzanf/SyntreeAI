@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize GenAI Client
 client = genai.Client(api_key=settings.gemini_api_key)
-model = "gemini-3.5-flash"
+model = "gemini-2.5-flash"
 
 @router.post("/analyze/{repo_id}")
 async def analyze_repository(repo_id: int):
