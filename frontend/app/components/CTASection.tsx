@@ -64,7 +64,7 @@ export default function CTASection() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-3xl md:text-5xl font-extrabold tracking-tighter text-gradient leading-[1.1]"
         >
-          Ready to index your workspace?
+          Your codebase. Fully understood.
         </motion.h2>
 
         {/* Subtitle */}
@@ -75,8 +75,7 @@ export default function CTASection() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-neutral-400 text-sm md:text-base max-w-xl mx-auto font-sans"
         >
-          Paste a public GitHub repository link below to build an AST-aware index 
-          and start querying your codebase in natural language.
+          From onboarding to PR reviews to health diagnostics — SyntreeAI gives you the tools senior engineers wish they had.
         </motion.p>
 
         {/* Input Card Container */}
@@ -123,11 +122,11 @@ export default function CTASection() {
                     className="w-full pl-11 pr-4 py-3.5 rounded-lg border border-neutral-800 bg-black/40 text-sm text-[#EDEDED] font-mono placeholder-neutral-600 focus-neon transition-colors"
                   />
                 </div>
-                <button
+                 <button
                   type="submit"
                   className="px-6 py-3.5 rounded-lg bg-blue-600 hover:bg-blue-500 font-semibold text-sm text-white shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all duration-300 transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer shrink-0"
                 >
-                  <span>Build Index</span>
+                  <span>Analyze Repository</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </motion.form>

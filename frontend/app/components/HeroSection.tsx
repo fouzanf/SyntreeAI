@@ -8,41 +8,123 @@ import Link from "next/link";
 export default function HeroSection() {
   const [terminalText, setTerminalText] = useState("");
   const [stage, setStage] = useState(0); // 0: query typing, 1: processing, 2: response rendering
+  const [demoIdx, setDemoIdx] = useState(0);
 
-  const query = "syntree ask 'Where is authorization verified, and does it attach the user context?'";
-
-  const processingSteps = [
-    { text: "Initializing repository context (AST-index: 100%)...", delay: 100 },
-    { text: "Traversing tree-sitter AST nodes for 'authorization'...", delay: 600 },
-    { text: "Tracing cross-file import graph: auth.ts → session.ts...", delay: 1100 },
-    { text: "Assembling Graph-RAG context (3 files, 84 lines)...", delay: 1600 }
-  ];
-
-  const responseLines = [
-    "Authorization is verified in middleware/auth.ts (L14-22).",
-    "It attaches the verified user payload directly to the request context:",
-    "",
-    "// middleware/auth.ts",
-    "export async function middleware(req: NextRequest) {",
-    "  const token = req.headers.get('authorization')?.split(' ')[1];",
-    "  const session = await verifySession(token); // imports from session.ts",
-    "  req.ctx.user = session.user; // Attaches user object",
-    "  return NextResponse.next();",
-    "}"
+  const demos = [
+    {
+      query: 'syntree ask "How does the authentication flow work?"',
+      steps: [
+        { text: "Initializing repository context (AST-index: 100%)...", delay: 100 },
+        { text: "Traversing tree-sitter AST nodes for 'auth'...", delay: 500 },
+        { text: "Tracing cross-file import graph: middleware.py → auth.py...", delay: 900 },
+        { text: "Assembling Graph-RAG context (2 files, 45 lines)...", delay: 1300 }
+      ],
+      response: [
+        "Found in auth/middleware.py (Lines 45-89)...",
+        "It verifies the session tokens and processes identity attributes:",
+        ""
+      ],
+      filename: "auth/middleware.py",
+      language: "Python",
+      code: `def verify_session(request):
+    token = request.headers.get("Authorization")
+    if not token:
+        raise AuthenticationError("Token missing")
+    session = db.verify_token(token) # auth.py:54
+    request.user = session.user
+    return True`
+    },
+    {
+      query: 'syntree ask "Review this PR for security issues"',
+      steps: [
+        { text: "Fetching GitHub Pull Request #3484 diff...", delay: 100 },
+        { text: "Analyzing changed files (2 files, +34 lines)...", delay: 500 },
+        { text: "Running AI security audits on changes...", delay: 900 },
+        { text: "Scanning dependency impact...", delay: 1300 }
+      ],
+      response: [
+        "PR #3484 is safe to merge. Here's why...",
+        "- Zero SQL injection vulnerabilities detected.",
+        "- Dependency additions are clean and safe."
+      ],
+      filename: "api/views.py",
+      language: "Python",
+      code: `-   query = "SELECT * FROM users WHERE id = '%s'" % user_id
++   query = "SELECT * FROM users WHERE id = %s"
++   cursor.execute(query, (user_id,)) # Parameterized query`
+    },
+    {
+      query: 'syntree ask "Show me the dependency graph"',
+      steps: [
+        { text: "Scanning local file structures...", delay: 100 },
+        { text: "Tracing internal import statements...", delay: 500 },
+        { text: "Building dynamic force-directed node map...", delay: 900 },
+        { text: "Resolving 36 module relationships...", delay: 1300 }
+      ],
+      response: [
+        "Mapping 36 internal relationships...",
+        "Interactive D3 Graph visualization ready.",
+        "Detected 0 circular dependencies."
+      ],
+      filename: "workspace-graph.json",
+      language: "JSON",
+      code: `{
+  "nodes": [{"id": "main.py"}, {"id": "auth/middleware.py"}],
+  "links": [
+    {"source": "main.py", "target": "auth/middleware.py", "weight": 4}
+  ]
+}`
+    },
+    {
+      query: 'syntree ask "What\'s the health score of this codebase?"',
+      steps: [
+        { text: "Measuring cyclomatic complexity...", delay: 100 },
+        { text: "Analyzing documentation and test density...", delay: 500 },
+        { text: "Calculating dependency structural depth...", delay: 900 },
+        { text: "Compiling repository health index...", delay: 1300 }
+      ],
+      response: [
+        "Overall Score: 72/100 — Grade B...",
+        "Complexity: High (8 files need refactoring)",
+        "Documentation coverage: 84% | Test signal: 68%"
+      ],
+      filename: "health-report.json",
+      language: "JSON",
+      code: `{
+  "grade": "B",
+  "score": 72,
+  "metrics": {
+    "documentation_density": "84%",
+    "coverage_signal": "68%"
+  }
+}`
+    }
   ];
 
   useEffect(() => {
     if (stage === 0) {
       let charIdx = 0;
+      const currentQuery = demos[demoIdx].query;
       const interval = setInterval(() => {
-        setTerminalText((prev) => prev + query[charIdx]);
+        setTerminalText((prev) => prev + currentQuery[charIdx]);
         charIdx++;
-        if (charIdx === query.length) {
+        if (charIdx === currentQuery.length) {
           clearInterval(interval);
           setTimeout(() => setStage(1), 500);
         }
-      }, 40);
+      }, 35);
       return () => clearInterval(interval);
+    }
+  }, [stage, demoIdx]);
+
+  useEffect(() => {
+    if (stage === 2) {
+      const timer = setTimeout(() => {
+        setStage(0);
+        setTerminalText("");
+        setDemoIdx((prev) => (prev + 1) % demos.length);
+      }, 5000);
+      return () => clearTimeout(timer);
     }
   }, [stage]);
 
@@ -110,8 +192,8 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter text-gradient leading-[1.1]"
           >
-            Understand any <br className="hidden sm:inline" />
-            codebase in <span className="text-gradient-accent">seconds</span>
+            Understand Any <br className="hidden sm:inline" />
+            Codebase. <span className="text-gradient-accent">Instantly.</span>
           </motion.h1>
 
           {/* Subheading */}
@@ -119,11 +201,12 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-base md:text-lg text-neutral-400 max-w-xl font-sans"
+            className="text-base md:text-lg text-neutral-400 max-w-2xl font-sans"
           >
-            Stop wasting hours tracing import chains and reading outdated docs.
-            SyntreeAI uses Tree-sitter AST parsing and cross-file graph traversal
-            to let you query code in plain English.
+            SyntreeAI ingests entire GitHub repositories using AST-aware chunking,
+            builds a semantic vector index, and lets you query code in plain English
+            — with deterministic citations, PR reviews, dependency graphs, and health
+            diagnostics built in.
           </motion.p>
 
           {/* Actions */}
@@ -194,7 +277,7 @@ export default function HeroSection() {
             </div>
 
             {/* Terminal Content */}
-            <div className="p-5 font-mono text-xs md:text-[13px] leading-relaxed min-h-[340px] flex flex-col justify-between overflow-x-auto text-left">
+            <div className="p-5 font-mono text-xs md:text-[13px] leading-relaxed min-h-[360px] flex flex-col justify-between overflow-x-auto text-left">
               <div className="space-y-4">
                 {/* User input query */}
                 <div>
@@ -205,8 +288,13 @@ export default function HeroSection() {
                 {/* Processing Steps */}
                 {stage >= 1 && (
                   <div className="space-y-1.5 text-neutral-400 border-l-2 border-blue-500/20 pl-3">
-                    {processingSteps.map((step, idx) => (
-                      <StepText key={idx} text={step.text} delay={step.delay} onComplete={idx === processingSteps.length - 1 ? () => setStage(2) : undefined} />
+                    {demos[demoIdx].steps.map((step, idx) => (
+                      <StepText
+                        key={`${demoIdx}-${idx}`}
+                        text={step.text}
+                        delay={step.delay}
+                        onComplete={idx === demos[demoIdx].steps.length - 1 ? () => setStage(2) : undefined}
+                      />
                     ))}
                   </div>
                 )}
@@ -222,7 +310,7 @@ export default function HeroSection() {
                     <div className="flex items-start gap-1.5">
                       <Server className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
                       <div>
-                        {responseLines.slice(0, 3).map((line, idx) => (
+                        {demos[demoIdx].response.map((line, idx) => (
                           <p key={idx} className={idx === 0 ? "text-neutral-200 font-medium" : "text-neutral-400 mt-1"}>{line}</p>
                         ))}
                       </div>
@@ -231,18 +319,11 @@ export default function HeroSection() {
                     {/* Simulated Code Editor */}
                     <div className="rounded-lg bg-black/40 border border-neutral-900 overflow-hidden font-mono text-xs">
                       <div className="px-3 py-1.5 bg-neutral-950/80 border-b border-neutral-900/60 text-neutral-500 flex items-center justify-between">
-                        <span>middleware/auth.ts</span>
-                        <span className="text-blue-400 text-[10px]">TypeScript</span>
+                        <span>{demos[demoIdx].filename}</span>
+                        <span className="text-blue-400 text-[10px]">{demos[demoIdx].language}</span>
                       </div>
                       <pre className="p-3 text-neutral-300 overflow-x-auto text-left leading-relaxed">
-                        <code>
-                          <span className="text-blue-400">export async function</span> <span className="text-yellow-400">middleware</span>(req: NextRequest) &#123;{"\n"}
-                          {"  "}<span className="text-blue-400">const</span> token = req.headers.<span className="text-yellow-400">get</span>(<span className="text-green-400">'authorization'</span>)?.<span className="text-yellow-400">split</span>(<span className="text-green-400">' '</span>)[1];{"\n"}
-                          {"  "}<span className="text-blue-400">const</span> session = <span className="text-blue-400">await</span> <span className="text-yellow-400">verifySession</span>(token); <span className="text-neutral-600">// session.ts:42</span>{"\n"}
-                          {"  "}req.ctx.user = session.user; <span className="text-neutral-600">// Attaches context</span>{"\n"}
-                          {"  "}<span className="text-blue-400">return</span> NextResponse.<span className="text-yellow-400">next</span>();{"\n"}
-                          &#125;
-                        </code>
+                        <code>{demos[demoIdx].code}</code>
                       </pre>
                     </div>
                   </motion.div>
@@ -257,10 +338,11 @@ export default function HeroSection() {
                   onClick={() => {
                     setTerminalText("");
                     setStage(0);
+                    setDemoIdx((prev) => (prev + 1) % demos.length);
                   }}
                   className="mt-4 self-end text-[10px] px-2 py-1 rounded bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white transition-all flex items-center gap-1 select-none"
                 >
-                  <span>Replay Demo</span>
+                  <span>Next Demo</span>
                   <ChevronRight className="w-3 h-3" />
                 </motion.button>
               )}

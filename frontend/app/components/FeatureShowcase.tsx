@@ -2,14 +2,14 @@
 
 import React from "react";
 import { motion, Variants } from "framer-motion";
-import { Layers, Network, FileText, CheckCircle2, ArrowRight } from "lucide-react";
+import { Code, GitPullRequest, Network, Split, Activity, MessageSquare } from "lucide-react";
 
 export default function FeatureShowcase() {
   const containerVariants: Variants = {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.15
+        staggerChildren: 0.1
       }
     }
   };
@@ -22,6 +22,52 @@ export default function FeatureShowcase() {
       transition: { type: "spring", stiffness: 70, damping: 15 }
     }
   };
+
+  const features = [
+    {
+      title: "AST-Aware Chunking",
+      icon: <Code className="w-5 h-5 text-purple-400" />,
+      desc: "tree-sitter parses Python, TypeScript, and JavaScript into complete functions and classes — the same engine powering GitHub Copilot and Sourcegraph",
+      tag: "Core Feature",
+      tagBg: "bg-[#7C3AED] text-white"
+    },
+    {
+      title: "Semantic PR Review",
+      icon: <GitPullRequest className="w-5 h-5 text-blue-400" />,
+      desc: "Paste any GitHub PR URL. SyntreeAI fetches the diff, analyzes changed files with AI, and tells you if it's safe to merge — with exact line citations",
+      tag: "New",
+      tagBg: "bg-[#3B82F6] text-white",
+      accent: true
+    },
+    {
+      title: "Dependency Graph",
+      icon: <Network className="w-5 h-5 text-cyan-400" />,
+      desc: "Interactive D3 force-directed graph showing every internal import relationship. Hover nodes to explore connections. Filter by language.",
+      tag: "Visual",
+      tagBg: "bg-[#06B6D4] text-neutral-950 font-bold"
+    },
+    {
+      title: "Semantic Diff Viewer",
+      icon: <Split className="w-5 h-5 text-blue-400" />,
+      desc: "Side-by-side and unified diff views with AI annotations pinned inline to changed lines. Click 'Annotate with AI' for instant code review.",
+      tag: "New",
+      tagBg: "bg-[#3B82F6] text-white"
+    },
+    {
+      title: "Codebase Health Dashboard",
+      icon: <Activity className="w-5 h-5 text-emerald-400" />,
+      desc: "Cyclomatic complexity, documentation density, test coverage signal, and dependency depth — all computed from the AST and visualized with an animated score gauge.",
+      tag: "Analytics",
+      tagBg: "bg-[#10B981] text-white"
+    },
+    {
+      title: "Multi-turn Memory",
+      icon: <MessageSquare className="w-5 h-5 text-amber-400" />,
+      desc: "Ask follow-up questions that reference previous answers. SyntreeAI maintains conversation context across up to 6 turns per session.",
+      tag: "AI",
+      tagBg: "bg-[#F59E0B] text-neutral-950 font-bold"
+    }
+  ];
 
   return (
     <section id="features" className="relative py-28 px-6 max-w-7xl mx-auto z-10">
@@ -61,136 +107,57 @@ export default function FeatureShowcase() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
-        {/* Feature 1: Tree-sitter chunking */}
-        <motion.div
-          variants={cardVariants}
-          whileHover={{ y: -6, borderColor: "rgba(59, 130, 246, 0.2)", boxShadow: "0 15px 35px rgba(59, 130, 246, 0.04)" }}
-          className="flex flex-col rounded-xl bg-neutral-900/30 backdrop-blur-sm border border-neutral-800/80 transition-all duration-300 overflow-hidden"
-        >
-          {/* Mockup Top */}
-          <div className="p-4 bg-neutral-950/60 border-b border-neutral-900 flex items-center justify-between font-mono text-[10px] text-neutral-500">
-            <span className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 text-blue-500" /> AST Chunking</span>
-            <span className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">AST</span>
-          </div>
-
-          {/* Interactive AST Mockup */}
-          <div className="p-5 flex-grow font-mono text-xs text-neutral-400 space-y-4">
-            <div className="rounded border border-neutral-800 bg-neutral-950/40 overflow-hidden text-left">
-              <div className="px-3 py-1.5 bg-neutral-900/60 text-[10px] text-neutral-500 border-b border-neutral-800 flex justify-between">
-                <span>parser.ts</span>
-                <span className="text-green-500 font-bold">Scoped</span>
-              </div>
-              <div className="p-3 text-[11px] space-y-2 leading-relaxed">
-                <div>
-                  <span className="text-blue-400">export function</span> <span className="text-yellow-400">parseTree</span>(node) &#123;
-                </div>
-                <div className="pl-4 text-blue-400/80 bg-blue-500/5 border-l-2 border-blue-500 px-2 py-0.5 my-1 rounded-r">
-                  <span className="text-blue-400">const</span> ast = treeSitter.<span className="text-yellow-400">init</span>();{"\n"}
-                  <span className="text-blue-400">return</span> ast.<span className="text-yellow-400">walk</span>();
-                </div>
-                <div>&#125;</div>
-              </div>
+        {features.map((feature, idx) => (
+          <motion.div
+            key={idx}
+            variants={cardVariants}
+            whileHover={{
+              y: -6,
+              borderColor: feature.accent ? "rgba(59, 130, 246, 0.5)" : "rgba(59, 130, 246, 0.2)",
+              boxShadow: feature.accent ? "0 15px 35px rgba(59, 130, 246, 0.08)" : "0 15px 35px rgba(59, 130, 246, 0.04)"
+            }}
+            className={`flex flex-col justify-between p-8 rounded-xl bg-neutral-900/30 backdrop-blur-sm border transition-all duration-300 relative group overflow-hidden ${
+              feature.accent
+                ? "border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.15)] bg-neutral-900/40"
+                : "border-neutral-800/80"
+            }`}
+          >
+            {/* Tag pill in top right */}
+            <div className="absolute top-4 right-4">
+              <span className={`inline-block text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-white/10 ${feature.tagBg}`}>
+                {feature.tag}
+              </span>
             </div>
-            <div className="text-xs text-neutral-500 flex items-center gap-1.5 pl-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-blue-500" />
-              <span>Lexical boundaries preserved. No split statements.</span>
-            </div>
-          </div>
 
-          {/* Text Content */}
-          <div className="p-6 border-t border-neutral-900 text-left space-y-2">
-            <h3 className="text-base font-bold text-neutral-200 font-sans">AST-Aware Chunking</h3>
-            <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-              Instead of slicing code into arbitrary token chunks, SyntreeAI compiles files using Tree-sitter to preserve complete, logical blocks (functions, classes, interfaces) with import metadata.
-            </p>
-          </div>
-        </motion.div>
+            {/* Ambient light corner accent */}
+            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl rounded-bl-full pointer-events-none transition-all duration-300 ${
+              feature.accent
+                ? "from-blue-500/20 group-hover:from-blue-500/30"
+                : "from-blue-500/5 group-hover:from-blue-500/10"
+            }`} />
 
-        {/* Feature 2: Scope Graph Traversal */}
-        <motion.div
-          variants={cardVariants}
-          whileHover={{ y: -6, borderColor: "rgba(59, 130, 246, 0.2)", boxShadow: "0 15px 35px rgba(59, 130, 246, 0.04)" }}
-          className="flex flex-col rounded-xl bg-neutral-900/30 backdrop-blur-sm border border-neutral-800/80 transition-all duration-300 overflow-hidden"
-        >
-          {/* Mockup Top */}
-          <div className="p-4 bg-neutral-950/60 border-b border-neutral-900 flex items-center justify-between font-mono text-[10px] text-neutral-500">
-            <span className="flex items-center gap-1.5"><Network className="w-3.5 h-3.5 text-blue-500" /> Graph-RAG Scope</span>
-            <span className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">Graph</span>
-          </div>
-
-          {/* Interactive Graph-RAG Mockup */}
-          <div className="p-5 flex-grow font-mono text-xs text-neutral-400 space-y-4">
-            <div className="rounded border border-neutral-800 bg-neutral-950/40 p-3 text-[11px] text-left space-y-3 h-32 flex flex-col justify-center">
-              <div className="flex justify-between text-neutral-500 border-b border-neutral-900 pb-1.5 mb-1.5">
-                <span>Dependency Linker</span>
-                <span className="text-blue-500">Linked</span>
+            <div className="space-y-4">
+              {/* Icon block */}
+              <div className={`inline-flex p-2.5 rounded-lg bg-neutral-950/80 border ${
+                feature.accent ? "border-blue-500/30 text-blue-400" : "border-neutral-800"
+              }`}>
+                {feature.icon}
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-neutral-300">app/page.tsx</span>
-                <ArrowRight className="w-3.5 h-3.5 text-neutral-600" />
-                <span className="text-neutral-400 font-semibold">components/Hero.tsx</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-neutral-500 pl-4">└─ imports</span>
-                <ArrowRight className="w-3.5 h-3.5 text-neutral-600" />
-                <span className="text-blue-400 font-semibold">hooks/useScroll.ts</span>
-              </div>
-            </div>
-            <div className="text-xs text-neutral-500 flex items-center gap-1.5 pl-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-blue-500" />
-              <span>Traces reference dependencies up to 4 layers deep.</span>
-            </div>
-          </div>
 
-          {/* Text Content */}
-          <div className="p-6 border-t border-neutral-900 text-left space-y-2">
-            <h3 className="text-base font-bold text-neutral-200 font-sans">Scope Graph Traversal</h3>
-            <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-              Retrieve related code, even when it is directories away. Our retriever traces exports, class inheritance, and module imports to construct an interactive scope graph for your queries.
-            </p>
-          </div>
-        </motion.div>
+              {/* Title */}
+              <h3 className="text-base font-bold text-neutral-200 font-sans tracking-tight pr-20">
+                {feature.title}
+              </h3>
 
-        {/* Feature 3: Citations */}
-        <motion.div
-          variants={cardVariants}
-          whileHover={{ y: -6, borderColor: "rgba(59, 130, 246, 0.2)", boxShadow: "0 15px 35px rgba(59, 130, 246, 0.04)" }}
-          className="flex flex-col rounded-xl bg-neutral-900/30 backdrop-blur-sm border border-neutral-800/80 transition-all duration-300 overflow-hidden"
-        >
-          {/* Mockup Top */}
-          <div className="p-4 bg-neutral-950/60 border-b border-neutral-900 flex items-center justify-between font-mono text-[10px] text-neutral-500">
-            <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-blue-500" /> Citation UI</span>
-            <span className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">Citations</span>
-          </div>
-
-          {/* Interactive Citation Mockup */}
-          <div className="p-5 flex-grow font-mono text-xs text-neutral-400 space-y-4">
-            <div className="rounded border border-neutral-800 bg-neutral-950/40 p-3 text-[11px] text-left space-y-2.5">
-              <p className="text-neutral-400">"The database pool is initialized in..."</p>
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 cursor-pointer self-start w-fit text-[10px]">
-                <FileText className="w-3 h-3" />
-                <span>lib/db.ts • Line 12-16</span>
-              </div>
-              <div className="pl-3 border-l-2 border-neutral-800 text-neutral-500 text-[10px] pt-1">
-                export const db = new Pool(&#123; max: 20 &#125;);
-              </div>
+              {/* Description */}
+              <p className="text-xs text-neutral-400 leading-relaxed font-sans">
+                {feature.desc}
+              </p>
             </div>
-            <div className="text-xs text-neutral-500 flex items-center gap-1.5 pl-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-blue-500" />
-              <span>Full audit trail. Verify every AI explanation instantly.</span>
-            </div>
-          </div>
-
-          {/* Text Content */}
-          <div className="p-6 border-t border-neutral-900 text-left space-y-2">
-            <h3 className="text-base font-bold text-neutral-200 font-sans">AST-Linked Citations</h3>
-            <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-              Never guess which file is referenced. Every answer is backed by exact file references, complete with line numbers, code snippets, and direct links so you can verify answers instantly.
-            </p>
-          </div>
-        </motion.div>
+          </motion.div>
+        ))}
       </motion.div>
     </section>
   );

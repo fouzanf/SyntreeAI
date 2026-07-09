@@ -9,9 +9,9 @@ export default function HowItWorks() {
     {
       number: "01",
       icon: <GitBranch className="w-5 h-5 text-blue-400" />,
-      title: "Secure Repo Link",
-      subtitle: "Instant connection and indexing",
-      desc: "Connect your repository. SyntreeAI securely indexes your repository, mapping out folder hierarchies, config files, and package dependencies in an isolated sandbox.",
+      title: "Paste a GitHub URL or PR link",
+      subtitle: "Instant Ingestion & Filtering",
+      desc: "SyntreeAI clones the repo and filters relevant source files automatically",
       visual: (
         <div className="rounded-lg bg-black/50 border border-neutral-800 p-4 font-mono text-xs text-neutral-400 space-y-2 select-none h-48 flex flex-col justify-center">
           <div className="flex items-center gap-2 text-neutral-500 pb-2 border-b border-neutral-900">
@@ -33,9 +33,9 @@ export default function HowItWorks() {
     {
       number: "02",
       icon: <Code2 className="w-5 h-5 text-blue-400" />,
-      title: "AST-Aware Chunking",
+      title: "AST-aware semantic indexing",
       subtitle: "Parsing syntax with Tree-sitter",
-      desc: "Standard AI search fragments code blindly by token count, cutting functions in half. SyntreeAI parses your files into Abstract Syntax Trees, grouping code by class, method, or hook boundaries to maintain lexical context.",
+      desc: "tree-sitter parses every function and class into chunks. Gemini embeds them into pgvector for millisecond retrieval",
       visual: (
         <div className="rounded-lg bg-black/50 border border-neutral-800 p-4 font-mono text-xs text-neutral-400 space-y-3 h-48 overflow-hidden flex flex-col justify-center select-none">
           <div className="flex justify-between items-center text-neutral-500 text-[10px]">
@@ -59,9 +59,9 @@ export default function HowItWorks() {
     {
       number: "03",
       icon: <Search className="w-5 h-5 text-blue-400" />,
-      title: "Graph-RAG Retrival",
+      title: "Ask anything, get cited answers",
       subtitle: "Tracing dependency context",
-      desc: "When you ask a question, SyntreeAI doesn't just search keywords. It traverses the cross-file import graph to fetch type definitions, helper modules, and database structures that are key to the correct solution.",
+      desc: "Every answer is pinned to exact file paths and line numbers. Zero hallucinations.",
       visual: (
         <div className="rounded-lg bg-black/50 border border-neutral-800 p-4 font-mono text-xs text-neutral-400 h-48 flex flex-col justify-center select-none relative overflow-hidden">
           <div className="absolute top-3 left-3 flex items-center gap-1.5 text-neutral-500 text-[10px]">

@@ -9,20 +9,20 @@ export default function ProblemSection() {
     {
       icon: <Clock className="w-5 h-5 text-red-400" />,
       title: "Onboarding Lag",
-      stat: "3+ Weeks",
-      desc: "Average developer onboarding time before shipping the first production commit to a complex codebase."
+      stat: "3 Weeks",
+      desc: "Average developer onboarding time before shipping the first production commit."
     },
     {
       icon: <EyeOff className="w-5 h-5 text-amber-400" />,
-      title: "The Context Tax",
-      stat: "70% of Time",
-      desc: "Spent on reading legacy structures, tracing dependency routes, and figuring out side effects."
+      title: "Misunderstood Code",
+      stat: "67%",
+      desc: "of bugs come from misunderstood code, legacy structures, and side effects."
     },
     {
       icon: <AlertTriangle className="w-5 h-5 text-red-500" />,
-      title: "Rotting Docs",
-      stat: "100% Outdated",
-      desc: "READMEs, internal wikis, and design specs are obsolete the second the next branch is merged."
+      title: "PR Review Latency",
+      stat: "2.5 Hours",
+      desc: "on average are spent reviewing PRs, halting team velocity."
     }
   ];
 

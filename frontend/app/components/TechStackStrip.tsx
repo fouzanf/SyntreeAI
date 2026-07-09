@@ -1,16 +1,20 @@
 "use client";
 
 import React from "react";
-import { Cpu, Terminal, Database, Sparkles, Code2, Server } from "lucide-react";
+import { Terminal, Database, Sparkles, Code2, Server, Boxes, Activity, Zap, Lock, Code } from "lucide-react";
 
 export default function TechStackStrip() {
   const techItems = [
-    { name: "Next.js 15", icon: <Code2 className="w-4 h-4 text-neutral-400" /> },
+    { name: "Next.js", icon: <Code2 className="w-4 h-4 text-neutral-400" /> },
     { name: "FastAPI", icon: <Server className="w-4 h-4 text-neutral-400" /> },
     { name: "pgvector", icon: <Database className="w-4 h-4 text-neutral-400" /> },
     { name: "Gemini 3.5 Flash", icon: <Sparkles className="w-4 h-4 text-blue-400" /> },
-    { name: "Tree-sitter AST", icon: <Terminal className="w-4 h-4 text-neutral-400" /> },
-    { name: "TypeScript", icon: <Cpu className="w-4 h-4 text-neutral-400" /> },
+    { name: "tree-sitter", icon: <Terminal className="w-4 h-4 text-neutral-400" /> },
+    { name: "React Three Fiber", icon: <Boxes className="w-4 h-4 text-neutral-400" /> },
+    { name: "D3.js", icon: <Activity className="w-4 h-4 text-neutral-400" /> },
+    { name: "Neon", icon: <Zap className="w-4 h-4 text-neutral-400" /> },
+    { name: "NextAuth.js", icon: <Lock className="w-4 h-4 text-neutral-400" /> },
+    { name: "Monaco Editor", icon: <Code className="w-4 h-4 text-neutral-400" /> },
   ];
 
   // Double the list to make an infinite marquee
