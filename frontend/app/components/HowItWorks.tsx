@@ -91,7 +91,7 @@ export default function HowItWorks() {
   return (
     <section id="how-it-works" className="relative py-28 px-6 max-w-7xl mx-auto z-10">
       <div className="text-center max-w-2xl mx-auto mb-20 space-y-4">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -100,7 +100,7 @@ export default function HowItWorks() {
         >
           How It Works
         </motion.div>
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -109,14 +109,14 @@ export default function HowItWorks() {
         >
           Engineered for syntax, not raw text
         </motion.h2>
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-neutral-400 font-sans"
         >
-          Other tools treat code as simple blocks of English. We treat it as 
+          Other tools treat code as simple blocks of English. We treat it as
           structured logic, retaining accurate scoped context.
         </motion.p>
       </div>
@@ -126,12 +126,12 @@ export default function HowItWorks() {
         {steps.map((step, idx) => {
           const isEven = idx % 2 === 0;
           return (
-            <div 
+            <div
               key={idx}
               className={`flex flex-col ${isEven ? "lg:flex-row" : "lg:flex-row-reverse"} gap-12 items-center`}
             >
               {/* Text content side */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, x: isEven ? -40 : 40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
@@ -156,7 +156,7 @@ export default function HowItWorks() {
               </motion.div>
 
               {/* Visual mockup side */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, x: isEven ? 40 : -40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-100px" }}

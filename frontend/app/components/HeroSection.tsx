@@ -8,9 +8,9 @@ import Link from "next/link";
 export default function HeroSection() {
   const [terminalText, setTerminalText] = useState("");
   const [stage, setStage] = useState(0); // 0: query typing, 1: processing, 2: response rendering
-  
+
   const query = "syntree ask 'Where is authorization verified, and does it attach the user context?'";
-  
+
   const processingSteps = [
     { text: "Initializing repository context (AST-index: 100%)...", delay: 100 },
     { text: "Traversing tree-sitter AST nodes for 'authorization'...", delay: 600 },
@@ -63,7 +63,7 @@ export default function HeroSection() {
           <Link href="/app" className="hover:text-white transition-colors">Connect Repo</Link>
         </div>
         <div>
-          <a 
+          <a
             href="#cta"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 hover:border-neutral-700 transition-all text-xs font-mono font-medium"
           >
@@ -90,7 +90,7 @@ export default function HeroSection() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full mt-8 z-10">
         <div className="lg:col-span-7 flex flex-col justify-center text-left space-y-6">
           {/* Badge */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -121,8 +121,8 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-base md:text-lg text-neutral-400 max-w-xl font-sans"
           >
-            Stop wasting hours tracing import chains and reading outdated docs. 
-            SyntreeAI uses Tree-sitter AST parsing and cross-file graph traversal 
+            Stop wasting hours tracing import chains and reading outdated docs.
+            SyntreeAI uses Tree-sitter AST parsing and cross-file graph traversal
             to let you query code in plain English.
           </motion.p>
 
@@ -227,7 +227,7 @@ export default function HeroSection() {
                         ))}
                       </div>
                     </div>
-                    
+
                     {/* Simulated Code Editor */}
                     <div className="rounded-lg bg-black/40 border border-neutral-900 overflow-hidden font-mono text-xs">
                       <div className="px-3 py-1.5 bg-neutral-950/80 border-b border-neutral-900/60 text-neutral-500 flex items-center justify-between">

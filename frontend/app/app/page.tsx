@@ -18,9 +18,11 @@ import {
   AlertTriangle,
   Code2,
   Sparkles,
-  GitCompare
+  GitCompare,
+  LogOut
 } from "lucide-react";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -185,11 +187,10 @@ function TreeNodeItem({ node, onSelectFile, activeFilePath }: TreeNodeProps) {
   return (
     <button
       onClick={() => onSelectFile(node.path)}
-      className={`w-full flex items-center justify-between gap-2 py-1 px-1.5 text-xs font-mono rounded transition-colors text-left cursor-pointer ${
-        isActive
-          ? "bg-blue-600/10 text-blue-400 border border-blue-500/20"
-          : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/40 border border-transparent"
-      }`}
+      className={`w-full flex items-center justify-between gap-2 py-1 px-1.5 text-xs font-mono rounded transition-colors text-left cursor-pointer ${isActive
+        ? "bg-blue-600/10 text-blue-400 border border-blue-500/20"
+        : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/40 border border-transparent"
+        }`}
     >
       <div className="flex items-center gap-2 min-w-0">
         <FileCode className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
@@ -205,6 +206,11 @@ function TreeNodeItem({ node, onSelectFile, activeFilePath }: TreeNodeProps) {
 // --- MAIN PAGE ---
 
 export default function AppPage() {
+  const { data: session } = useSession();
+  const [githubRepos, setGithubRepos] = useState<any[]>([]);
+  const [isLoadingRepos, setIsLoadingRepos] = useState(false);
+  const [reposError, setReposError] = useState("");
+
   // Page States
   const [pageState, setPageState] = useState<"INGEST" | "CHAT">("INGEST");
   const [ingestStatus, setIngestStatus] = useState<"idle" | "ingesting" | "error">("idle");
@@ -272,18 +278,49 @@ export default function AppPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, firstTokenReceived]);
 
+  // Fetch GitHub user repositories if authenticated via GitHub
+  useEffect(() => {
+    if (session?.accessToken) {
+      setIsLoadingRepos(true);
+      setReposError("");
+      fetch("https://api.github.com/user/repos?sort=updated&per_page=30", {
+        headers: {
+          Authorization: `token ${session.accessToken}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch repos");
+          return res.json();
+        })
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setGithubRepos(data);
+          } else {
+            setReposError("Failed to parse repository response");
+          }
+          setIsLoadingRepos(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setReposError("Failed to load GitHub repositories");
+          setIsLoadingRepos(false);
+        });
+    }
+  }, [session]);
+
   // Suggestions (dynamically adjust for PR review)
   const suggestions = repoInfo?.type === "pr_review"
     ? [
-        "Are there any security vulnerabilities?",
-        "What are the potential breaking changes?",
-        "Is the test coverage adequate?"
-      ]
+      "Are there any security vulnerabilities?",
+      "What are the potential breaking changes?",
+      "Is the test coverage adequate?"
+    ]
     : [
-        "How is this project structured?",
-        "What are the main classes and functions?",
-        "How does error handling work in this codebase?"
-      ];
+      "How is this project structured?",
+      "What are the main classes and functions?",
+      "How does error handling work in this codebase?"
+    ];
 
   // Ingestion Submission
   const handleIngestSubmit = async (e: React.FormEvent) => {
@@ -305,8 +342,8 @@ export default function AppPage() {
 
       try {
         setPrUrl(githubUrl.trim());
-        const generator = reviewPR(githubUrl.trim(), "Is this PR safe to merge?", chatHistory);
-        
+        const generator = reviewPR(githubUrl.trim(), chatHistory);
+
         let repoId: number | null = null;
         const userMsgId = Math.random().toString();
         const assistantMsgId = Math.random().toString();
@@ -327,9 +364,9 @@ export default function AppPage() {
             try {
               getHealthReport(repoId).then((cached) => {
                 setHealthData(cached);
-              }).catch(() => {});
-            } catch (e) {}
-            
+              }).catch(() => { });
+            } catch (e) { }
+
             // Add initial messages
             setMessages([
               { id: userMsgId, role: "user", content: "Is this PR safe to merge?" },
@@ -532,10 +569,10 @@ export default function AppPage() {
         prev.map((msg) =>
           msg.id === assistantMessageId
             ? {
-                ...msg,
-                content: "Something went wrong. Try again.",
-                isLoading: false
-              }
+              ...msg,
+              content: "Something went wrong. Try again.",
+              isLoading: false
+            }
             : msg
         )
       );
@@ -639,12 +676,42 @@ export default function AppPage() {
             Syntree<span className="text-blue-500 font-mono">AI</span>
           </span>
         </Link>
-        <div className="flex items-center gap-3">
-          <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-          </span>
-          <span className="text-xs font-mono text-neutral-400">FastAPI Backend Connected</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            <span className="text-xs font-mono text-neutral-400 hidden sm:inline">FastAPI Backend Connected</span>
+          </div>
+          {session?.user && (
+            <div className="flex items-center gap-3 pl-4 border-l border-[#1F1F23]/60">
+              <div className="flex items-center gap-2">
+                {session.user.image ? (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name || "User Avatar"}
+                    className="w-7 h-7 rounded-full border border-[#1F1F23] select-none"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-[10px] font-semibold text-blue-400 select-none">
+                    {session.user.name?.charAt(0) || "U"}
+                  </div>
+                )}
+                <span className="text-xs font-medium text-neutral-300 max-w-[120px] truncate hidden md:inline">
+                  {session.user.name}
+                </span>
+              </div>
+              <button
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                title="Sign out"
+                className="p-1.5 rounded-md hover:bg-neutral-800/40 text-neutral-400 hover:text-white transition-all cursor-pointer flex items-center justify-center"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -692,7 +759,7 @@ export default function AppPage() {
                         <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
                           <AlertTriangle className="w-6 h-6 animate-pulse" />
                         </div>
-                        
+
                         <div className="space-y-2 max-w-md">
                           <h3 className="text-sm font-semibold font-mono text-neutral-300 uppercase tracking-wider">
                             Quota Limit Reached
@@ -715,7 +782,7 @@ export default function AppPage() {
                             <RefreshCw className="w-3.5 h-3.5" />
                             <span>Retry</span>
                           </button>
-                          
+
                           <button
                             type="button"
                             onClick={() => {
@@ -745,11 +812,10 @@ export default function AppPage() {
                               setIngestMode("repo");
                               setIngestError("");
                             }}
-                            className={`flex-1 py-2 text-center text-xs font-mono font-semibold rounded-md transition-all cursor-pointer ${
-                              ingestMode === "repo"
-                                ? "bg-blue-600 text-white shadow-lg font-bold"
-                                : "text-neutral-500 hover:text-neutral-350"
-                            }`}
+                            className={`flex-1 py-2 text-center text-xs font-mono font-semibold rounded-md transition-all cursor-pointer ${ingestMode === "repo"
+                              ? "bg-blue-600 text-white shadow-lg font-bold"
+                              : "text-neutral-500 hover:text-neutral-350"
+                              }`}
                           >
                             Analyze Repository
                           </button>
@@ -759,11 +825,10 @@ export default function AppPage() {
                               setIngestMode("pr");
                               setIngestError("");
                             }}
-                            className={`flex-1 py-2 text-center text-xs font-mono font-semibold rounded-md transition-all cursor-pointer ${
-                              ingestMode === "pr"
-                                ? "bg-blue-600 text-white shadow-lg font-bold"
-                                : "text-neutral-500 hover:text-neutral-350"
-                            }`}
+                            className={`flex-1 py-2 text-center text-xs font-mono font-semibold rounded-md transition-all cursor-pointer ${ingestMode === "pr"
+                              ? "bg-blue-600 text-white shadow-lg font-bold"
+                              : "text-neutral-500 hover:text-neutral-350"
+                              }`}
                           >
                             Review PR
                           </button>
@@ -798,6 +863,36 @@ export default function AppPage() {
                               className="w-full pl-11 pr-4 py-3.5 rounded-lg border border-[#1F1F23] bg-black/50 text-sm text-[#EDEDED] font-mono placeholder-neutral-600 focus-neon transition-colors"
                             />
                           </div>
+                          {session?.accessToken && ingestMode === "repo" && githubRepos.length > 0 && (
+                            <div className="space-y-1.5 mt-2">
+                              <div className="relative">
+                                <select
+                                  onChange={(e) => {
+                                    if (e.target.value) {
+                                      setGithubUrl(e.target.value);
+                                    }
+                                  }}
+                                  className="w-full pl-3.5 pr-10 py-2.5 rounded-lg border border-[#1F1F23] bg-black/50 text-xs text-neutral-400 font-mono focus-neon transition-colors appearance-none cursor-pointer"
+                                  defaultValue=""
+                                >
+                                  <option value="" disabled className="bg-[#0A0A0B]">
+                                    {isLoadingRepos ? "Loading your GitHub repositories..." : "Or select recent repository..."}
+                                  </option>
+                                  {githubRepos.map((repo: any) => (
+                                    <option key={repo.id} value={repo.html_url} className="bg-[#0A0A0B]">
+                                      {repo.full_name} {repo.private ? "🔒" : ""}
+                                    </option>
+                                  ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none text-neutral-500">
+                                  <ChevronDown className="w-4 h-4" />
+                                </div>
+                              </div>
+                              {reposError && (
+                                <p className="text-[10px] text-red-400 pl-1">{reposError}</p>
+                              )}
+                            </div>
+                          )}
                           {ingestError && (
                             <motion.div
                               initial={{ opacity: 0, y: -5 }}
@@ -828,7 +923,7 @@ export default function AppPage() {
                         className="w-full py-6 flex flex-col items-center justify-center space-y-5"
                       >
                         <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                        
+
                         <div className="h-6 flex items-center justify-center">
                           <AnimatePresence mode="wait">
                             <motion.div
@@ -998,42 +1093,38 @@ export default function AppPage() {
                   <div className="flex border-b border-[#1F1F23]/60 bg-black/10 shrink-0 overflow-x-auto no-scrollbar">
                     <button
                       onClick={() => setLeftTab("citations")}
-                      className={`flex-1 min-w-[90px] py-2 text-center text-xs font-mono border-b-2 font-semibold transition-colors cursor-pointer ${
-                        leftTab === "citations"
-                          ? "border-blue-500 text-blue-400 bg-blue-500/[0.02]"
-                          : "border-transparent text-neutral-500 hover:text-neutral-300"
-                      }`}
+                      className={`flex-1 min-w-[90px] py-2 text-center text-xs font-mono border-b-2 font-semibold transition-colors cursor-pointer ${leftTab === "citations"
+                        ? "border-blue-500 text-blue-400 bg-blue-500/[0.02]"
+                        : "border-transparent text-neutral-500 hover:text-neutral-300"
+                        }`}
                     >
                       Citations ({accumulatedCitations.length})
                     </button>
                     <button
                       onClick={() => setLeftTab("files")}
-                      className={`flex-1 min-w-[90px] py-2 text-center text-xs font-mono border-b-2 font-semibold transition-colors cursor-pointer ${
-                        leftTab === "files"
-                          ? "border-blue-500 text-blue-400 bg-blue-500/[0.02]"
-                          : "border-transparent text-neutral-500 hover:text-neutral-300"
-                      }`}
+                      className={`flex-1 min-w-[90px] py-2 text-center text-xs font-mono border-b-2 font-semibold transition-colors cursor-pointer ${leftTab === "files"
+                        ? "border-blue-500 text-blue-400 bg-blue-500/[0.02]"
+                        : "border-transparent text-neutral-500 hover:text-neutral-300"
+                        }`}
                     >
                       File Tree
                     </button>
                     <button
                       onClick={() => setLeftTab("graph")}
-                      className={`flex-1 min-w-[125px] py-2 text-center text-xs font-mono border-b-2 font-semibold transition-colors cursor-pointer ${
-                        leftTab === "graph"
-                          ? "border-blue-500 text-blue-400 bg-blue-500/[0.02]"
-                          : "border-transparent text-neutral-500 hover:text-neutral-300"
-                      }`}
+                      className={`flex-1 min-w-[125px] py-2 text-center text-xs font-mono border-b-2 font-semibold transition-colors cursor-pointer ${leftTab === "graph"
+                        ? "border-blue-500 text-blue-400 bg-blue-500/[0.02]"
+                        : "border-transparent text-neutral-500 hover:text-neutral-300"
+                        }`}
                     >
                       Dependency Graph
                     </button>
                     {repoInfo?.type === "pr_review" && (
                       <button
                         onClick={() => setLeftTab("changed_files")}
-                        className={`flex-1 min-w-[110px] py-2 text-center text-xs font-mono border-b-2 font-semibold transition-colors cursor-pointer ${
-                          leftTab === "changed_files"
-                            ? "border-blue-500 text-blue-400 bg-blue-500/[0.02]"
-                            : "border-transparent text-neutral-500 hover:text-neutral-300"
-                        }`}
+                        className={`flex-1 min-w-[110px] py-2 text-center text-xs font-mono border-b-2 font-semibold transition-colors cursor-pointer ${leftTab === "changed_files"
+                          ? "border-blue-500 text-blue-400 bg-blue-500/[0.02]"
+                          : "border-transparent text-neutral-500 hover:text-neutral-300"
+                          }`}
                       >
                         Changed Files
                       </button>
@@ -1071,11 +1162,10 @@ export default function AppPage() {
                                   key={cit.id}
                                   id={`citation-${cit.id}`}
                                   onClick={() => setActiveCitationId(cit.id)}
-                                  className={`p-3.5 rounded-lg border transition-all cursor-pointer ${
-                                    isHighlighted
-                                      ? "bg-blue-600/[0.06] border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.15)]"
-                                      : "bg-black/20 border-neutral-800/80 hover:border-blue-500/30 hover:shadow-[0_0_10px_rgba(59,130,246,0.06)]"
-                                  }`}
+                                  className={`p-3.5 rounded-lg border transition-all cursor-pointer ${isHighlighted
+                                    ? "bg-blue-600/[0.06] border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.15)]"
+                                    : "bg-black/20 border-neutral-800/80 hover:border-blue-500/30 hover:shadow-[0_0_10px_rgba(59,130,246,0.06)]"
+                                    }`}
                                 >
                                   <div className="flex items-center justify-between gap-2 mb-2">
                                     <span className="font-mono text-xs text-neutral-200 truncate select-all pr-2">
@@ -1258,11 +1348,10 @@ export default function AppPage() {
                         >
                           {/* Message Bubble Container */}
                           <div
-                            className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
-                              msg.role === "user"
-                                ? "bg-blue-600 text-white font-medium shadow-[0_0_15px_rgba(59,130,246,0.15)] rounded-br-none"
-                                : "bg-black/35 border border-[#1F1F23] text-neutral-200 rounded-bl-none"
-                            }`}
+                            className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed ${msg.role === "user"
+                              ? "bg-blue-600 text-white font-medium shadow-[0_0_15px_rgba(59,130,246,0.15)] rounded-br-none"
+                              : "bg-black/35 border border-[#1F1F23] text-neutral-200 rounded-bl-none"
+                              }`}
                           >
                             {msg.role === "user" ? (
                               <p className="whitespace-pre-wrap">{msg.content}</p>

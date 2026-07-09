@@ -159,8 +159,7 @@ export async function* streamQuery(
  */
 export async function* reviewPR(
   prUrl: string,
-  question: string = "Is this PR safe to merge?",
-  messages?: { role: string; content: string }[]
+  messages: { role: string; content: string }[] = []
 ): AsyncGenerator<
   | { type: "repo_id"; data: number }
   | { type: "citation"; data: Citation[] }
@@ -174,7 +173,11 @@ export async function* reviewPR(
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ pr_url: prUrl, question, messages }),
+    body: JSON.stringify({
+      pr_url: prUrl,
+      question: "Is this PR safe to merge?",
+      messages
+    }),
   });
 
   if (!response.ok) {
@@ -203,39 +206,73 @@ export async function* reviewPR(
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
+      
+      // Save the last incomplete line to process in the next chunk
       buffer = lines.pop() || "";
 
       for (const line of lines) {
         const trimmed = line.trim();
-        if (!trimmed || !trimmed.startsWith("data: ")) continue;
+        if (!trimmed) continue;
 
+        if (trimmed.startsWith("data: ")) {
+          const dataContent = trimmed.slice(6).trim();
+
+          if (dataContent === "[DONE]") {
+            yield { type: "done" };
+            return;
+          }
+
+          try {
+            const parsed = JSON.parse(dataContent);
+            
+            if (parsed.error) {
+              throw new Error(parsed.error);
+            }
+            
+            if (parsed.repo_id !== undefined) {
+              yield { type: "repo_id", data: parsed.repo_id };
+            }
+            if (parsed.citations !== undefined) {
+              yield { type: "citation", data: parsed.citations };
+            }
+            if (parsed.token !== undefined) {
+              yield { type: "token", data: parsed.token };
+            }
+          } catch (e) {
+            if (e instanceof Error) {
+              throw e;
+            }
+            throw new Error("Error parsing SSE data stream.");
+          }
+        }
+      }
+    }
+    
+    // Process any remaining text in the buffer
+    if (buffer.trim()) {
+      const trimmed = buffer.trim();
+      if (trimmed.startsWith("data: ")) {
         const dataContent = trimmed.slice(6).trim();
-
         if (dataContent === "[DONE]") {
           yield { type: "done" };
           return;
         }
-
         try {
           const parsed = JSON.parse(dataContent);
-          
           if (parsed.error) {
             throw new Error(parsed.error);
           }
-          
           if (parsed.repo_id !== undefined) {
             yield { type: "repo_id", data: parsed.repo_id };
           }
-          if (parsed.citations) {
+          if (parsed.citations !== undefined) {
             yield { type: "citation", data: parsed.citations };
-          } else if (parsed.token !== undefined) {
+          }
+          if (parsed.token !== undefined) {
             yield { type: "token", data: parsed.token };
           }
-        } catch (e) {
-          if (e instanceof Error) {
-            throw e;
-          }
-          throw new Error("Error parsing SSE data stream.");
+        } catch {
+          // Ignore
         }
       }
     }

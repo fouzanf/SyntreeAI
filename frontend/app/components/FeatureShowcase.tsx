@@ -16,8 +16,8 @@ export default function FeatureShowcase() {
 
   const cardVariants: Variants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { type: "spring", stiffness: 70, damping: 15 }
     }
@@ -26,7 +26,7 @@ export default function FeatureShowcase() {
   return (
     <section id="features" className="relative py-28 px-6 max-w-7xl mx-auto z-10">
       <div className="text-center max-w-2xl mx-auto mb-20 space-y-4">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -35,7 +35,7 @@ export default function FeatureShowcase() {
         >
           Product Features
         </motion.div>
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -44,19 +44,19 @@ export default function FeatureShowcase() {
         >
           Built for modern code discovery
         </motion.h2>
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-neutral-400 font-sans"
         >
-          SyntreeAI indexes the structure, semantics, and relationships of your 
+          SyntreeAI indexes the structure, semantics, and relationships of your
           workspace, giving you IDE-grade reference tracing in seconds.
         </motion.p>
       </div>
 
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
@@ -74,7 +74,7 @@ export default function FeatureShowcase() {
             <span className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 text-blue-500" /> AST Chunking</span>
             <span className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">AST</span>
           </div>
-          
+
           {/* Interactive AST Mockup */}
           <div className="p-5 flex-grow font-mono text-xs text-neutral-400 space-y-4">
             <div className="rounded border border-neutral-800 bg-neutral-950/40 overflow-hidden text-left">

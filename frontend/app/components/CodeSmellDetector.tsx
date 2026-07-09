@@ -42,7 +42,7 @@ export default function CodeSmellDetector({
     return () => {
       // Clean up / abort stream reader if component unmounts
       if (streamReaderRef.current) {
-        streamReaderRef.current.cancel().catch(() => {});
+        streamReaderRef.current.cancel().catch(() => { });
       }
     };
   }, [repoId]);
@@ -65,7 +65,7 @@ export default function CodeSmellDetector({
         try {
           const errJson = await response.json();
           errText = errJson.detail || errText;
-        } catch {}
+        } catch { }
         throw new Error(errText);
       }
 
@@ -273,11 +273,10 @@ export default function CodeSmellDetector({
               <button
                 key={sev}
                 onClick={() => setFilterSeverity(sev)}
-                className={`flex-1 py-1 rounded text-[10px] font-mono font-bold capitalize transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-[#1E1B18] border border-amber-500/20 text-amber-500 shadow-inner"
-                    : "text-neutral-500 border border-transparent hover:text-neutral-300"
-                }`}
+                className={`flex-1 py-1 rounded text-[10px] font-mono font-bold capitalize transition-all cursor-pointer ${isActive
+                  ? "bg-[#1E1B18] border border-amber-500/20 text-amber-500 shadow-inner"
+                  : "text-neutral-500 border border-transparent hover:text-neutral-300"
+                  }`}
               >
                 {sev} ({count})
               </button>
@@ -301,8 +300,8 @@ export default function CodeSmellDetector({
             issue.severity === "critical"
               ? "border-l-4 border-l-red-500"
               : issue.severity === "warning"
-              ? "border-l-4 border-l-amber-500"
-              : "border-l-4 border-l-blue-500";
+                ? "border-l-4 border-l-amber-500"
+                : "border-l-4 border-l-blue-500";
 
           // Icon based on severity
           const SeverityIcon =
@@ -312,8 +311,8 @@ export default function CodeSmellDetector({
             issue.severity === "critical"
               ? "text-red-400 bg-red-500/10 border-red-500/20"
               : issue.severity === "warning"
-              ? "text-amber-400 bg-amber-500/10 border-amber-500/20"
-              : "text-blue-400 bg-blue-500/10 border-blue-500/20";
+                ? "text-amber-400 bg-amber-500/10 border-amber-500/20"
+                : "text-blue-400 bg-blue-500/10 border-blue-500/20";
 
           return (
             <div

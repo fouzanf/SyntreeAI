@@ -26,10 +26,10 @@ export default function Footer() {
           <a href="#problem" className="hover:text-neutral-300 transition-colors">Friction</a>
           <a href="#how-it-works" className="hover:text-neutral-300 transition-colors">How it works</a>
           <a href="#features" className="hover:text-neutral-300 transition-colors">Features</a>
-          <a 
-            href="https://github.com" 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href="https://github.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className="hover:text-neutral-300 transition-colors"
           >
             GitHub
@@ -38,10 +38,10 @@ export default function Footer() {
 
         {/* Right: Social icons */}
         <div className="flex items-center gap-4 text-neutral-650">
-          <a 
-            href="https://github.com" 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href="https://github.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className="p-1.5 rounded-full hover:bg-neutral-900 border border-transparent hover:border-neutral-800 text-neutral-500 hover:text-[#EDEDED] transition-all"
             aria-label="GitHub"
           >
@@ -60,10 +60,10 @@ export default function Footer() {
               <path d="M9 18c-4.51 2-5-2-7-2" />
             </svg>
           </a>
-          <a 
-            href="https://twitter.com" 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href="https://twitter.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className="p-1.5 rounded-full hover:bg-neutral-900 border border-transparent hover:border-neutral-800 text-neutral-500 hover:text-[#EDEDED] transition-all"
             aria-label="Twitter"
           >
